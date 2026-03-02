@@ -14,7 +14,7 @@ namespace MeuSite.Models.Entities
         public decimal ValorTotal { get; set; }
         
         [Required]
-        public int Parcelas { get; set; }
+        public int NumeroParcelas { get; set; }
         
         [Required]
         public DateTime DataPrimeiroVencimento { get; set; }
@@ -24,6 +24,6 @@ namespace MeuSite.Models.Entities
         
         public virtual ControleAno ControleAno { get; set; } = null!;
         public virtual Categoria? Categoria { get; set; }
-        public virtual ICollection<ParcelaDivida> Parcelas { get; set; } = new List<ParcelaDivida>();
+        public virtual ICollection<ParcelaDivida> ParcelasDividas { get; set; } = new List<ParcelaDivida>();
     }
 }

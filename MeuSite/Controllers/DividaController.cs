@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MeuSite.Data;
 using Microsoft.EntityFrameworkCore;
 using MeuSite.Models.Entities;
@@ -19,7 +20,7 @@ namespace MeuSite.Controllers
             var dividas = await _context.Dividas
                 .Include(d => d.ControleAno)
                 .Include(d => d.Categoria)
-                .Include(d => d.Parcelas)
+                .Include(d => d.ParcelasDividas)
                 .Where(d => !controleAnoId.HasValue || d.ControleAnoId == controleAnoId.Value)
                 .OrderByDescending(d => d.DataPrimeiroVencimento)
                 .ToListAsync();
@@ -34,8 +35,8 @@ namespace MeuSite.Controllers
         public async Task<IActionResult> Create(int? controleAnoId)
         {
             ViewBag.ControleAnoId = controleAnoId;
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View();
         }
 
@@ -54,16 +55,16 @@ namespace MeuSite.Controllers
                 return RedirectToAction(nameof(Index), new { controleAnoId = divida.ControleAnoId });
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View(divida);
         }
 
         private async Task CriarParcelas(Divida divida)
         {
-            decimal valorParcela = divida.ValorTotal / divida.Parcelas;
+            decimal valorParcela = divida.ValorTotal / divida.NumeroParcelas;
             
-            for (int i = 1; i <= divida.Parcelas; i++)
+            for (int i = 1; i <= divida.NumeroParcelas; i++)
             {
                 var parcela = new ParcelaDivida
                 {
@@ -89,7 +90,7 @@ namespace MeuSite.Controllers
 
             var divida = await _context.Dividas
                 .Include(d => d.Categoria)
-                .Include(d => d.Parcelas)
+                .Include(d => d.ParcelasDividas)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (divida == null)
@@ -97,8 +98,8 @@ namespace MeuSite.Controllers
                 return NotFound();
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View(divida);
         }
 
@@ -132,8 +133,8 @@ namespace MeuSite.Controllers
                 return RedirectToAction(nameof(Index), new { controleAnoId = divida.ControleAnoId });
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View(divida);
         }
 
@@ -147,7 +148,7 @@ namespace MeuSite.Controllers
             var divida = await _context.Dividas
                 .Include(d => d.ControleAno)
                 .Include(d => d.Categoria)
-                .Include(d => d.Parcelas)
+                .Include(d => d.ParcelasDividas)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (divida == null)
@@ -163,13 +164,13 @@ namespace MeuSite.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var divida = await _context.Dividas
-                .Include(d => d.Parcelas)
+                .Include(d => d.ParcelasDividas)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (divida != null)
             {
                 // Remover parcelas primeiro
-                _context.ParcelaDividas.RemoveRange(divida.Parcelas);
+                _context.ParcelaDividas.RemoveRange(divida.ParcelasDividas);
                 _context.Dividas.Remove(divida);
                 await _context.SaveChangesAsync();
             }
@@ -207,7 +208,7 @@ namespace MeuSite.Controllers
             var divida = await _context.Dividas
                 .Include(d => d.ControleAno)
                 .Include(d => d.Categoria)
-                .Include(d => d.Parcelas.OrderBy(p => p.NumeroParcela))
+                .Include(d => d.ParcelasDividas.OrderBy(p => p.NumeroParcela))
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (divida == null)

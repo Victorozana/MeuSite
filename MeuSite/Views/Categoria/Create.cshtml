@@ -1,0 +1,113 @@
+@model MeuSite.Models.Entities.Categoria
+@{
+    ViewData["Title"] = "Nova Categoria";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form id="categoriaCreateForm" asp-controller="Categoria" asp-action="Create" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Nome" class="form-label fw-bold">Nome da Categoria</label>
+                            <input asp-for="Nome" class="form-control" placeholder="Ex: Alimentação, Transporte, Saúde" />
+                            <span asp-validation-for="Nome" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Cor" class="form-label fw-bold">Cor</label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input asp-for="Cor" class="form-control" type="color" value="#007bff" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input id="CorHex" class="form-control" placeholder="#RRGGBB" maxlength="7" value="@(Model?.Cor ?? "#007bff")" />
+                                </div>
+                            </div>
+                            <small class="text-muted">Escolha uma cor para identificar visualmente a categoria</small>
+                            <span asp-validation-for="Cor" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Controle Ano</label>
+                            <select asp-for="ControleAnoId" class="form-select" asp-items="ViewBag.ControleAnos">
+                            </select>
+                            <span asp-validation-for="ControleAnoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-lightbulb"></i> Dicas Rápidas</h6>
+                                <ul class="mb-0">
+                                    <li>Categorias comuns: Alimentação, Transporte, Saúde, Lazer, Educação</li>
+                                    <li>Use cores diferentes para facilitar identificação visual</li>
+                                    <li>Categorias podem ter várias subcategorias para melhor organização</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-palette"></i> Cores Sugeridas</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm" style="background-color: #28a745; color: white;" onclick="setCor('#28a745')">Verde</button>
+                                    <button type="button" class="btn btn-sm" style="background-color: #dc3545; color: white;" onclick="setCor('#dc3545')">Vermelho</button>
+                                    <button type="button" class="btn btn-sm" style="background-color: #ffc107; color: black;" onclick="setCor('#ffc107')">Amarelo</button>
+                                    <button type="button" class="btn btn-sm" style="background-color: #17a2b8; color: white;" onclick="setCor('#17a2b8')">Ciano</button>
+                                    <button type="button" class="btn btn-sm" style="background-color: #6f42c1; color: white;" onclick="setCor('#6f42c1')">Roxo</button>
+                                    <button type="button" class="btn btn-sm" style="background-color: #fd7e14; color: white;" onclick="setCor('#fd7e14')">Laranja</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Controle" asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="button" class="btn btn-info" onclick="document.getElementById('categoriaCreateForm')?.requestSubmit();">
+                                <i class="fas fa-save"></i> Salvar Categoria
+                            </button>
+                            <input type="submit" class="d-none" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function setCor(cor) {
+            document.getElementById('Cor').value = cor;
+            const hex = document.getElementById('CorHex');
+            if (hex) {
+                hex.value = cor;
+            }
+        }
+
+        // Sincronizar os dois inputs de cor
+        document.getElementById('Cor').addEventListener('input', function(e) {
+            const cor = e.target.value;
+            const textInput = document.getElementById('CorHex');
+            if (textInput) {
+                textInput.value = cor;
+            }
+        });
+
+        document.getElementById('CorHex').addEventListener('input', function(e) {
+            const cor = e.target.value;
+            const colorInput = document.getElementById('Cor');
+            if (colorInput && colorInput !== e.target) {
+                colorInput.value = cor;
+            }
+        });
+    </script>
+}

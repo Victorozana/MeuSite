@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MeuSite.Data;
 using Microsoft.EntityFrameworkCore;
 using MeuSite.Models.Entities;
@@ -34,8 +35,8 @@ namespace MeuSite.Controllers
         public async Task<IActionResult> Create(int? controleAnoId)
         {
             ViewBag.ControleAnoId = controleAnoId;
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View();
         }
 
@@ -50,8 +51,8 @@ namespace MeuSite.Controllers
                 return RedirectToAction(nameof(Index), new { controleAnoId = despesa.ControleAnoId });
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View(despesa);
         }
 
@@ -72,8 +73,8 @@ namespace MeuSite.Controllers
                 return NotFound();
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View(despesa);
         }
 
@@ -107,8 +108,8 @@ namespace MeuSite.Controllers
                 return RedirectToAction(nameof(Index), new { controleAnoId = despesa.ControleAnoId });
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
+            ViewBag.Categorias = new SelectList(await _context.Categorias.ToListAsync(), "Id", "Nome");
             return View(despesa);
         }
 

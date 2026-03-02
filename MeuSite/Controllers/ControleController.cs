@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MeuSite.Data;
 using Microsoft.EntityFrameworkCore;
+using MeuSite.Models.Entities;
 
 namespace MeuSite.Controllers
 {

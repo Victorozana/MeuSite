@@ -1,0 +1,78 @@
+@model MeuSite.Models.Entities.Despesa
+@{
+    ViewData["Title"] = "Nova Despesa";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Descricao" class="form-label fw-bold">Descrição</label>
+                                <input asp-for="Descricao" class="form-control" placeholder="Ex: Mercado, Aluguel, Conta de Luz" />
+                                <span asp-validation-for="Descricao" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Valor" class="form-label fw-bold">Valor (R$)</label>
+                                <input asp-for="Valor" class="form-control" type="number" step="0.01" min="0.01" placeholder="0,00" />
+                                <span asp-validation-for="Valor" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Data" class="form-label fw-bold">Data</label>
+                                <input asp-for="Data" class="form-control" type="date" />
+                                <span asp-validation-for="Data" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Controle Ano</label>
+                                <select asp-for="ControleAnoId" class="form-select" asp-items="ViewBag.ControleAnos"></select>
+                                <span asp-validation-for="ControleAnoId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Categoria</label>
+                                <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.Categorias">
+                                    <option value="">(Opcional)</option>
+                                </select>
+                                <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Subcategoria</label>
+                                <select asp-for="SubcategoriaId" class="form-select" id="subcategoriaSelect">
+                                    <option value="">(Opcional)</option>
+                                </select>
+                                <span asp-validation-for="SubcategoriaId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-save"></i> Salvar Despesa
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

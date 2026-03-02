@@ -1,0 +1,98 @@
+@model MeuSite.Models.Entities.Categoria
+@{
+    ViewData["Title"] = "Editar Categoria";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="Nome" class="form-label fw-bold">Nome da Categoria</label>
+                            <input asp-for="Nome" class="form-control" />
+                            <span asp-validation-for="Nome" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Cor" class="form-label fw-bold">Cor</label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input asp-for="Cor" class="form-control" type="color" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input id="CorHex" class="form-control" placeholder="#RRGGBB" maxlength="7" value="@Model.Cor" />
+                                </div>
+                            </div>
+                            <small class="text-muted">Escolha uma cor para identificar visualmente a categoria</small>
+                            <span asp-validation-for="Cor" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Controle Ano</label>
+                            <select asp-for="ControleAnoId" class="form-select" asp-items="ViewBag.ControleAnos">
+                                <option value="">Selecione...</option>
+                            </select>
+                            <span asp-validation-for="ControleAnoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-info-circle"></i> Informações Atuais</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Subcategorias:</small>
+                                        <div class="fw-bold">@Model.Subcategorias?.Count ?? 0</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Criada em:</small>
+                                        <div class="fw-bold">@DateTime.Now.ToString("dd/MM/yyyy")</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Sincronizar os dois inputs de cor
+        document.getElementById('Cor').addEventListener('input', function(e) {
+            const cor = e.target.value;
+            const textInput = document.getElementById('CorHex');
+            if (textInput) {
+                textInput.value = cor;
+            }
+        });
+
+        document.getElementById('CorHex').addEventListener('input', function(e) {
+            const cor = e.target.value;
+            const colorInput = document.getElementById('Cor');
+            if (colorInput && colorInput !== e.target) {
+                colorInput.value = cor;
+            }
+        });
+    </script>
+}

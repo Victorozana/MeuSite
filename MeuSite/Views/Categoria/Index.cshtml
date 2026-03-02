@@ -1,0 +1,167 @@
+@model IEnumerable<MeuSite.Models.Entities.Categoria>
+@{
+    ViewData["Title"] = "Categorias";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-info">@ViewData["Title"]</h1>
+            <p class="lead">Gerencie categorias e subcategorias para organizar melhor suas finanças</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                <a asp-action="Create" class="btn btn-info">
+                    <i class="fas fa-plus"></i> Nova Categoria
+                </a>
+                <a asp-controller="Controle" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro por Controle Ano -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <label class="form-label fw-bold">Filtrar por Ano:</label>
+                    @{
+                        var controleAnoId = ViewBag.ControleAnoId as int?;
+                        var isSelected = controleAnoId?.ToString();
+                    }
+                    <select id="controleAnoFilter" class="form-select" onchange="location.href='@Url.Action("Index")?controleAnoId=' + this.value">
+                        <option value="">Todos os anos</option>
+                        @foreach (var controle in ViewBag.ControleAnos)
+                        {
+                            @if (isSelected == controle.Id.ToString())
+                            {
+                                <option value="@controle.Id" selected>@controle.Nome (@controle.Ano)</option>
+                            }
+                            else
+                            {
+                                <option value="@controle.Id">@controle.Nome (@controle.Ano)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Categorias</h5>
+                    <h3 class="card-text">@Model.Count()</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Subcategorias</h5>
+                    <h3 class="card-text">@Model.Sum(c => c.Subcategorias?.Count ?? 0)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Com Subcategorias</h5>
+                    <h3 class="card-text">@Model.Count(c => c.Subcategorias?.Any() == true)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Sem Subcategorias</h5>
+                    <h3 class="card-text">@Model.Count(c => c.Subcategorias?.Any() != true)</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Categorias -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-tags"></i> Lista de Categorias</h5>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-tags text-info" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-muted">Nenhuma categoria cadastrada</h3>
+                    <p class="text-muted">Crie suas primeiras categorias para organizar receitas e despesas</p>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var categoria in Model)
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 border-2" style="border-color: @categoria.Cor !important;">
+                                <div class="card-header text-white" style="background-color: @categoria.Cor;">
+                                    <h6 class="mb-0"><i class="fas fa-tag"></i> @categoria.Nome</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <span class="badge" style="background-color: @categoria.Cor">@categoria.Subcategorias?.Count ?? 0 subcategorias</span>
+                                    </div>
+                                    
+                                    @if (categoria.Subcategorias?.Any() == true)
+                                    {
+                                        <div class="mb-3">
+                                            <small class="text-muted">Subcategorias:</small>
+                                            <div class="mt-1">
+                                                @foreach (var subcat in categoria.Subcategorias.Take(3))
+                                                {
+                                                    <span class="badge bg-secondary me-1">@subcat.Nome</span>
+                                                }
+                                                @if (categoria.Subcategorias.Count > 3)
+                                                {
+                                                    <span class="badge bg-secondary">+@(categoria.Subcategorias.Count - 3)</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> @categoria.ControleAno?.Nome (@categoria.ControleAno?.Ano)
+                                        </small>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Edit" asp-route-id="@categoria.Id" class="btn btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@categoria.Id" class="btn btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh a cada 30 segundos
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    </script>
+}

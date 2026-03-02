@@ -1,0 +1,70 @@
+@model MeuSite.Models.Entities.Despesa
+@{
+    ViewData["Title"] = "Excluir Despesa";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-danger">Tem certeza que deseja excluir esta despesa?</h5>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-striped">
+                            <tr>
+                                <th><strong>Descrição:</strong></th>
+                                <td>@Model.Descricao</td>
+                            </tr>
+                            <tr>
+                                <th><strong>Valor:</strong></th>
+                                <td class="text-danger fw-bold">R$ @Model.Valor.ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <th><strong>Data:</strong></th>
+                                <td>@Model.Data.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <th><strong>Categoria:</strong></th>
+                                <td>
+                                    @if (Model.Categoria != null)
+                                    {
+                                        <span class="badge" style="background-color: @Model.Categoria.Cor">@Model.Categoria.Nome</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sem categoria</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><strong>Controle Ano:</strong></th>
+                                <td>@Model.ControleAno?.Nome (@Model.ControleAno?.Ano)</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirmar Exclusão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

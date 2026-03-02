@@ -1,0 +1,116 @@
+@model MeuSite.Models.Entities.Receita
+@{
+    ViewData["Title"] = "Editar Receita";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Descricao" class="form-label fw-bold">Descrição</label>
+                                <input asp-for="Descricao" class="form-control" />
+                                <span asp-validation-for="Descricao" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Valor" class="form-label fw-bold">Valor (R$)</label>
+                                <input asp-for="Valor" class="form-control" type="number" step="0.01" min="0.01" />
+                                <span asp-validation-for="Valor" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Data" class="form-label fw-bold">Data</label>
+                                <input asp-for="Data" class="form-control" type="date" />
+                                <span asp-validation-for="Data" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Controle Ano</label>
+                                <select asp-for="ControleAnoId" class="form-select" asp-items="ViewBag.ControleAnos">
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <span asp-validation-for="ControleAnoId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Categoria</label>
+                                <select asp-for="CategoriaId" class="form-select" id="categoriaSelect">
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Subcategoria</label>
+                                <select asp-for="SubcategoriaId" class="form-select" id="subcategoriaSelect">
+                                    <option value="">Selecione uma categoria primeiro...</option>
+                                </select>
+                                <span asp-validation-for="SubcategoriaId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Carregar categorias e selecionar a atual
+            $.get('/Categoria/GetCategorias', function(data) {
+                var $categoriaSelect = $('#categoriaSelect');
+                $categoriaSelect.empty().append('<option value="">Selecione...</option>');
+                
+                $.each(data, function(index, categoria) {
+                    var selected = categoria.value === '@Model.CategoriaId' ? 'selected' : '';
+                    $categoriaSelect.append('<option value="' + categoria.value + '" ' + selected + '>' + categoria.text + '</option>');
+                });
+                
+                // Disparar change para carregar subcategorias
+                $categoriaSelect.trigger('change');
+            });
+
+            // Carregar subcategorias quando categoria for selecionada
+            $('#categoriaSelect').change(function() {
+                var categoriaId = $(this).val();
+                var $subcategoriaSelect = $('#subcategoriaSelect');
+                
+                if (categoriaId) {
+                    $.get('/Categoria/GetSubcategorias/' + categoriaId, function(data) {
+                        $subcategoriaSelect.empty().append('<option value="">Selecione...</option>');
+                        
+                        $.each(data, function(index, subcategoria) {
+                            var selected = subcategoria.value === '@Model.SubcategoriaId' ? 'selected' : '';
+                            $subcategoriaSelect.append('<option value="' + subcategoria.value + '" ' + selected + '>' + subcategoria.text + '</option>');
+                        });
+                    });
+                } else {
+                    $subcategoriaSelect.empty().append('<option value="">Selecione uma categoria primeiro...</option>');
+                }
+            });
+        });
+    </script>
+}

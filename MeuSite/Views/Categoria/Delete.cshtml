@@ -1,0 +1,79 @@
+@model MeuSite.Models.Entities.Categoria
+@{
+    ViewData["Title"] = "Excluir Categoria";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-danger">Tem certeza que deseja excluir esta categoria?</h5>
+                    
+                    <div class="table-responsive mb-4">
+                        <table class="table table-striped">
+                            <tr>
+                                <th><strong>Nome:</strong></th>
+                                <td>@Model.Nome</td>
+                            </tr>
+                            <tr>
+                                <th><strong>Cor:</strong></th>
+                                <td>
+                                    <span class="badge" style="background-color: @Model.Cor; color: white;">@Model.Cor</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><strong>Controle Ano:</strong></th>
+                                <td>@Model.ControleAno?.Nome (@Model.ControleAno?.Ano)</td>
+                            </tr>
+                            <tr>
+                                <th><strong>Subcategorias:</strong></th>
+                                <td>@Model.Subcategorias?.Count ?? 0</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    @if (Model.Subcategorias?.Any() == true)
+                    {
+                        <div class="alert alert-warning mb-4">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>Atenção:</strong> Esta categoria possui @(Model.Subcategorias.Count) subcategorias que também serão excluídas!
+                        </div>
+                        
+                        <div class="card bg-light mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">Subcategorias que serão excluídas:</h6>
+                            </div>
+                            <div class="card-body">
+                                @foreach (var subcat in Model.Subcategorias)
+                                {
+                                    <span class="badge bg-secondary me-2 mb-2">@subcat.Nome</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Atenção:</strong> Esta ação não pode ser desfeita e afetará todas as receitas e despesas associadas a esta categoria!
+                    </div>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirmar Exclusão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

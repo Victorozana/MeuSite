@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MeuSite.Data;
 using Microsoft.EntityFrameworkCore;
 using MeuSite.Models.Entities;
@@ -32,7 +33,7 @@ namespace MeuSite.Controllers
         public async Task<IActionResult> Create(int? controleAnoId)
         {
             ViewBag.ControleAnoId = controleAnoId;
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome", controleAnoId);
             return View();
         }
 
@@ -40,6 +41,9 @@ namespace MeuSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Categoria categoria)
         {
+            ModelState.Remove(nameof(Categoria.ControleAno));
+            ModelState.Remove(nameof(Categoria.Subcategorias));
+
             if (ModelState.IsValid)
             {
                 _context.Add(categoria);
@@ -47,7 +51,9 @@ namespace MeuSite.Controllers
                 return RedirectToAction(nameof(Index), new { controleAnoId = categoria.ControleAnoId });
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
+            ModelState.AddModelError(string.Empty, "Não foi possível salvar a categoria. Verifique os campos e tente novamente.");
+            ViewBag.ControleAnoId = categoria.ControleAnoId;
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome", categoria.ControleAnoId);
             return View(categoria);
         }
 
@@ -68,7 +74,7 @@ namespace MeuSite.Controllers
                 return NotFound();
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
             return View(categoria);
         }
 
@@ -80,6 +86,9 @@ namespace MeuSite.Controllers
             {
                 return NotFound();
             }
+
+            ModelState.Remove(nameof(Categoria.ControleAno));
+            ModelState.Remove(nameof(Categoria.Subcategorias));
 
             if (ModelState.IsValid)
             {
@@ -102,7 +111,7 @@ namespace MeuSite.Controllers
                 return RedirectToAction(nameof(Index), new { controleAnoId = categoria.ControleAnoId });
             }
 
-            ViewBag.ControleAnos = await _context.ControleAnos.ToListAsync();
+            ViewBag.ControleAnos = new SelectList(await _context.ControleAnos.ToListAsync(), "Id", "Nome");
             return View(categoria);
         }
 

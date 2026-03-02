@@ -1,0 +1,131 @@
+@model MeuSite.Models.Entities.Receita
+@{
+    ViewData["Title"] = "Nova Receita";
+}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Descricao" class="form-label fw-bold">Descrição</label>
+                                <input asp-for="Descricao" class="form-control" placeholder="Ex: Salário, Freelance, Vendas" />
+                                <span asp-validation-for="Descricao" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Valor" class="form-label fw-bold">Valor (R$)</label>
+                                <input asp-for="Valor" class="form-control" type="number" step="0.01" min="0.01" placeholder="0,00" />
+                                <span asp-validation-for="Valor" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Data" class="form-label fw-bold">Data</label>
+                                <input asp-for="Data" class="form-control" type="date" />
+                                <span asp-validation-for="Data" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Controle Ano</label>
+                                <select asp-for="ControleAnoId" class="form-select" asp-items="ViewBag.ControleAnos">
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <span asp-validation-for="ControleAnoId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Categoria</label>
+                                <select asp-for="CategoriaId" class="form-select" id="categoriaSelect">
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Subcategoria</label>
+                                <select asp-for="SubcategoriaId" class="form-select" id="subcategoriaSelect">
+                                    <option value="">Selecione uma categoria primeiro...</option>
+                                </select>
+                                <span asp-validation-for="SubcategoriaId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-lightbulb"></i> Dicas Rápidas</h6>
+                                <ul class="mb-0">
+                                    <li>Categorias comuns: Salário, Freelance, Vendas, Aluguel, Investimentos</li>
+                                    <li>Use descrições claras para facilitar o controle</li>
+                                    <li>Mantenha a data atual para melhor organização</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Controle" asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Salvar Receita
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Carregar categorias dinamicamente
+            $.get('/Categoria/GetCategorias', function(data) {
+                var $categoriaSelect = $('#categoriaSelect');
+                $categoriaSelect.empty().append('<option value="">Selecione...</option>');
+                
+                $.each(data, function(index, categoria) {
+                    $categoriaSelect.append('<option value="' + categoria.value + '">' + categoria.text + '</option>');
+                });
+            });
+
+            // Carregar subcategorias quando categoria for selecionada
+            $('#categoriaSelect').change(function() {
+                var categoriaId = $(this).val();
+                var $subcategoriaSelect = $('#subcategoriaSelect');
+                
+                if (categoriaId) {
+                    $.get('/Categoria/GetSubcategorias/' + categoriaId, function(data) {
+                        $subcategoriaSelect.empty().append('<option value="">Selecione...</option>');
+                        
+                        $.each(data, function(index, subcategoria) {
+                            $subcategoriaSelect.append('<option value="' + subcategoria.value + '">' + subcategoria.text + '</option>');
+                        });
+                    });
+                } else {
+                    $subcategoriaSelect.empty().append('<option value="">Selecione uma categoria primeiro...</option>');
+                }
+            });
+
+            // Formatar valor como moeda
+            $('#Valor').on('input', function() {
+                var value = $(this).val().replace(/[^\d.,]/g, '');
+                var parts = value.split(',');
+                if (parts.length > 2) {
+                    value = parts[0] + ',' + parts.slice(1).join('');
+                }
+                $(this).val(value);
+            });
+        });
+    </script>
+}
