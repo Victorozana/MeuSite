@@ -1,0 +1,174 @@
+@model MeuSite.Models.Entities.Divida
+@{
+    ViewData["Title"] = "Detalhes da Dívida";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-warning">@ViewData["Title"]</h1>
+            <p class="lead">Visualize e gerencie as parcelas da dívida</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações da Dívida -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card"></i> @Model.Descricao
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Valor Total:</strong> <span class="text-warning">@Model.ValorTotal:C</span></p>
+                            <p><strong>Número de Parcelas:</strong> @Model.NumeroParcelas</p>
+                            <p><strong>Valor por Parcela:</strong> <span class="text-info">@(Model.ValorTotal / Model.NumeroParcelas):C</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Data Primeiro Vencimento:</strong> @Model.DataPrimeiroVencimento.ToString("dd/MM/yyyy")</p>
+                            <p><strong>Controle:</strong> @Model.ControleAno?.Nome</p>
+                            @if (Model.Categoria != null)
+                            {
+                                <p><strong>Categoria:</strong> <span class="badge" style="background-color: @(Model.Categoria.Cor ?? "#ffc107")">@Model.Categoria.Nome</span></p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    @{
+                        var parcelasPagas = Model.Parcelas.Count(p => p.Paga);
+                        var totalParcelas = Model.Parcelas.Count;
+                        var percentualPago = totalParcelas > 0 ? (parcelasPagas * 100 / totalParcelas) : 0;
+                    }
+                    <h5>Progresso de Pagamento</h5>
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar bg-success" style="width: @percentualPago%">@percentualPago%</div>
+                    </div>
+                    <h3>@parcelasPagas / @totalParcelas parcelas pagas</h3>
+                    <p class="mb-0">Restam @(totalParcelas - parcelasPagas) parcelas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Parcelas -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Parcelas da Dívida
+                <span class="badge bg-white text-info float-end">@Model.Parcelas.Count parcelas</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Parcela</th>
+                            <th>Valor</th>
+                            <th>Data Vencimento</th>
+                            <th>Status</th>
+                            <th>Data Pagamento</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var parcela in Model.Parcelas.OrderBy(p => p.NumeroParcela))
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@parcela.NumeroParcela/@Model.Parcelas</strong>
+                                </td>
+                                <td>
+                                    <strong>@parcela.Valor:C</strong>
+                                </td>
+                                <td>
+                                    @parcela.DataVencimento.ToString("dd/MM/yyyy")
+                                    @if (parcela.DataVencimento < DateTime.Now && !parcela.Paga)
+                                    {
+                                        <br><span class="badge bg-danger">Vencida</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (parcela.Paga)
+                                    {
+                                        <span class="badge bg-success">Paga</span>
+                                    }
+                                    else if (parcela.DataVencimento < DateTime.Now)
+                                    {
+                                        <span class="badge bg-danger">Vencida</span>
+                                    }
+                                    else if (parcela.DataVencimento <= DateTime.Now.AddDays(7))
+                                    {
+                                        <span class="badge bg-warning">A vencer</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Aberta</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (parcela.Paga && parcela.DataPagamento.HasValue)
+                                    {
+                                        @parcela.DataPagamento.Value.ToString("dd/MM/yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (!parcela.Paga)
+                                    {
+                                        <form asp-action="PagarParcela" asp-route-id="@parcela.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Confirmar pagamento desta parcela?')">
+                                                <i class="fas fa-check"></i> Pagar
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success">
+                                            <i class="fas fa-check-circle"></i> Paga
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th colspan="2" class="text-end">Total Pago:</th>
+                            <th colspan="4">
+                                <strong class="text-success">@Model.Parcelas.Where(p => p.Paga).Sum(p => p.Valor):C</strong>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" class="text-end">Restante:</th>
+                            <th colspan="4">
+                                <strong class="text-warning">@Model.Parcelas.Where(p => !p.Paga).Sum(p => p.Valor):C</strong>
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

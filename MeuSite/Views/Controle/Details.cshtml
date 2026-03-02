@@ -1,0 +1,342 @@
+@model MeuSite.Models.Entities.ControleAno
+@inject MeuSite.Services.CalculoService CalculoService
+@inject MeuSite.Services.RelatorioService RelatorioService
+@{
+    ViewData["Title"] = $"Planejamento {Model.Ano}";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-primary">@ViewData["Title"]</h1>
+            <p class="lead">Resumo completo do controle financeiro de @Model.Ano</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Abas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="abasControle" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="resumo-tab" data-bs-toggle="tab" data-bs-target="#resumo" type="button" role="tab">
+                        <i class="fas fa-chart-pie"></i> Resumo Anual
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="receitas-tab" data-bs-toggle="tab" data-bs-target="#receitas" type="button" role="tab">
+                        <i class="fas fa-plus-circle text-success"></i> Receitas
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="despesas-tab" data-bs-toggle="tab" data-bs-target="#despesas" type="button" role="tab">
+                        <i class="fas fa-minus-circle text-danger"></i> Despesas
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="dividas-tab" data-bs-toggle="tab" data-bs-target="#dividas" type="button" role="tab">
+                        <i class="fas fa-credit-card text-warning"></i> Dívidas
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="categorias-tab" data-bs-toggle="tab" data-bs-target="#categorias" type="button" role="tab">
+                        <i class="fas fa-tags text-info"></i> Categorias
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="tab-content" id="abasControleContent">
+        <!-- Aba Resumo Anual -->
+        <div class="tab-pane fade show active" id="resumo" role="tabpanel">
+            @{
+                var resumo = await CalculoService.ObterResumoAnualAsync(Model.Id);
+                var parcelasProximas = await CalculoService.ObterParcelasProximasVencimentoAsync(Model.Id, 30);
+            }
+            
+            <!-- Cards Resumo -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h5>Receitas</h5>
+                            <h3>@resumo.TotalReceitas:C</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h5>Despesas</h5>
+                            <h3>@resumo.TotalDespesas:C</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h5>Dívidas Abertas</h5>
+                            <h3>@resumo.TotalDividasAbertas:C</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card @(resumo.Saldo >= 0 ? "bg-primary" : "bg-danger") text-white">
+                        <div class="card-body text-center">
+                            <h5>Saldo</h5>
+                            <h3>@resumo.Saldo:C</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Categorias -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Distribuição por Categoria</h5>
+                        </div>
+                        <div class="card-body">
+                            @if (resumo.ResumoPorCategoria.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Categoria</th>
+                                                <th class="text-end">Valor</th>
+                                                <th class="text-end">% do Total</th>
+                                                <th>Progresso</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in resumo.ResumoPorCategoria)
+                                            {
+                                                <tr>
+                                                    <td><strong>@item.Categoria</strong></td>
+                                                    <td class="text-end">@item.Valor:C</td>
+                                                    <td class="text-end">@item.Percentual.ToString("F1")%</td>
+                                                    <td>
+                                                        <div class="progress" style="height: 20px;">
+                                                            <div class="progress-bar" style="width: @item.Percentual%"></div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center">Nenhuma categoria com movimentação</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Indicadores</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Economia:</strong>
+                                <span class="@(resumo.Saldo >= 0 ? "text-success" : "text-danger")">
+                                    @resumo.Saldo:C (@(resumo.TotalReceitas > 0 ? (resumo.Saldo / resumo.TotalReceitas * 100).ToString("F1") : "0")%)
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Relação Despesa/Receita:</strong>
+                                <span class="text-info">
+                                    @(resumo.TotalReceitas > 0 ? (resumo.TotalDespesas / resumo.TotalReceitas * 100).ToString("F1") : "0")%
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Comprometimento com Dívidas:</strong>
+                                <span class="text-warning">
+                                    @(resumo.TotalReceitas > 0 ? (resumo.TotalDividasAbertas / resumo.TotalReceitas * 100).ToString("F1") : "0")%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Próximos Vencimentos -->
+            @if (parcelasProximas.Any())
+            {
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> Próximos Vencimentos (30 dias)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Dívida</th>
+                                        <th>Parcela</th>
+                                        <th>Valor</th>
+                                        <th>Vencimento</th>
+                                        <th>Dias</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var parcela in parcelasProximas)
+                                    {
+                                        <tr class="@(parcela.DiasAteVencimento <= 7 ? "table-warning" : "")">
+                                            <td>@parcela.DescricaoDivida</td>
+                                            <td>@parcela.NumeroParcela</td>
+                                            <td>@parcela.Valor:C</td>
+                                            <td>@parcela.DataVencimento.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <span class="badge @(parcela.DiasAteVencimento <= 7 ? "bg-danger" : "bg-info")">
+                                                    @parcela.DiasAteVencimento dias
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Divida" asp-action="Details" asp-route-id="@parcela.Id" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Aba Receitas -->
+        <div class="tab-pane fade" id="receitas" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Receitas do Ano</h5>
+                    <a asp-controller="Receita" asp-action="Create" asp-route-controleAnoId="@Model.Id" class="btn btn-light">
+                        <i class="fas fa-plus"></i> Nova Receita
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div id="listaReceitas">
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Despesas -->
+        <div class="tab-pane fade" id="despesas" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Despesas do Ano</h5>
+                    <a asp-controller="Despesa" asp-action="Create" asp-route-controleAnoId="@Model.Id" class="btn btn-light">
+                        <i class="fas fa-plus"></i> Nova Despesa
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div id="listaDespesas">
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Dívidas -->
+        <div class="tab-pane fade" id="dividas" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Dívidas do Ano</h5>
+                    <a asp-controller="Divida" asp-action="Create" asp-route-controleAnoId="@Model.Id" class="btn btn-dark">
+                        <i class="fas fa-plus"></i> Nova Dívida
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div id="listaDividas">
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Categorias -->
+        <div class="tab-pane fade" id="categorias" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Categorias do Ano</h5>
+                    <a asp-controller="Categoria" asp-action="Create" asp-route-controleAnoId="@Model.Id" class="btn btn-light">
+                        <i class="fas fa-plus"></i> Nova Categoria
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div id="listaCategorias">
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Carregar conteúdo das abas dinamicamente
+            $('#receitas-tab').on('shown.bs.tab', function() {
+                carregarReceitas();
+            });
+            
+            $('#despesas-tab').on('shown.bs.tab', function() {
+                carregarDespesas();
+            });
+            
+            $('#dividas-tab').on('shown.bs.tab', function() {
+                carregarDividas();
+            });
+            
+            $('#categorias-tab').on('shown.bs.tab', function() {
+                carregarCategorias();
+            });
+            
+            function carregarReceitas() {
+                $('#listaReceitas').load('/Receita/Index?controleAnoId=@Model.Id .card-body > *');
+            }
+            
+            function carregarDespesas() {
+                $('#listaDespesas').load('/Despesa/Index?controleAnoId=@Model.Id .card-body > *');
+            }
+            
+            function carregarDividas() {
+                $('#listaDividas').load('/Divida/Index?controleAnoId=@Model.Id .card-body > *');
+            }
+            
+            function carregarCategorias() {
+                $('#listaCategorias').load('/Categoria/Index?controleAnoId=@Model.Id .card-body > *');
+            }
+        });
+    </script>
+}

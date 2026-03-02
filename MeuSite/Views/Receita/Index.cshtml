@@ -1,0 +1,167 @@
+@model IEnumerable<MeuSite.Models.Entities.Receita>
+@{
+    ViewData["Title"] = "Receitas";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-success">@ViewData["Title"]</h1>
+            <p class="lead">Gerencie suas receitas e entradas financeiras</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                @if (ViewBag.ControleAnoId.HasValue)
+                {
+                    <a asp-action="Create" asp-route-controleAnoId="@ViewBag.ControleAnoId" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Nova Receita
+                    </a>
+                }
+                <a asp-controller="Controle" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro por Controle Ano -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <label class="form-label fw-bold">Filtrar por Ano:</label>
+                    @{
+                        var controleAnoId = ViewBag.ControleAnoId;
+                        var isSelected = controleAnoId?.ToString();
+                    }
+                    <select id="controleAnoFilter" class="form-select" onchange="location.href='@Url.Action("Index")?controleAnoId=' + this.value">
+                        <option value="">Todos os anos</option>
+                        @foreach (var controle in ViewBag.ControleAnos)
+                        {
+                            @if (isSelected == controle.Id.ToString())
+                            {
+                                <option value="@controle.Id" selected>@controle.Nome (@controle.Ano)</option>
+                            }
+                            else
+                            {
+                                <option value="@controle.Id">@controle.Nome (@controle.Ano)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col">
+                            <h5>Total de Receitas</h5>
+                            <h2>@Model.Sum(r => r.Valor):C</h2>
+                        </div>
+                        <div class="col">
+                            <h5>Quantidade</h5>
+                            <h2>@Model.Count()</h2>
+                        </div>
+                        <div class="col">
+                            <h5>Média</h5>
+                            <h2>@(Model.Any() ? Model.Average(r => r.Valor).ToString("C") : "R$ 0,00")</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-plus-circle text-success" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="text-muted">Nenhuma receita cadastrada</h3>
+            <p class="text-muted">Adicione sua primeira receita para começar a controlar suas finanças</p>
+            @if (ViewBag.ControleAnoId.HasValue)
+            {
+                <a asp-action="Create" asp-route-controleAnoId="@ViewBag.ControleAnoId" class="btn btn-lg btn-success">
+                    <i class="fas fa-plus"></i> Adicionar Receita
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Lista de Receitas
+                    <span class="badge bg-white text-success float-end">@Model.Count() itens</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var receita in Model)
+                            {
+                                <tr>
+                                    <td>@receita.Data.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <strong>@receita.Descricao</strong>
+                                        @if (!string.IsNullOrEmpty(receita.Subcategoria?.Nome))
+                                        {
+                                            <br><small class="text-muted">@receita.Subcategoria.Nome</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (receita.Categoria != null)
+                                        {
+                                            <span class="badge" style="background-color: @(receita.Categoria.Cor ?? "#28a745")">
+                                                @receita.Categoria.Nome
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sem categoria</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <strong class="text-success">@receita.Valor:C</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@receita.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@receita.Id" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th class="text-end">
+                                    <strong class="text-success">@Model.Sum(r => r.Valor):C</strong>
+                                </th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,162 @@
+@model IEnumerable<MeuSite.Models.Entities.Categoria>
+@{
+    ViewData["Title"] = "Categorias";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-info">@ViewData["Title"]</h1>
+            <p class="lead">Gerencie categorias e subcategorias para organizar melhor suas finanças</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                @if (ViewBag.ControleAnoId.HasValue)
+                {
+                    <a asp-action="Create" asp-route-controleAnoId="@ViewBag.ControleAnoId" class="btn btn-info">
+                        <i class="fas fa-plus"></i> Nova Categoria
+                    </a>
+                }
+                <a asp-controller="Controle" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro por Controle Ano -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <label class="form-label fw-bold">Filtrar por Ano:</label>
+                    @{
+                        var controleAnoId = ViewBag.ControleAnoId;
+                        var isSelected = controleAnoId?.ToString();
+                    }
+                    <select id="controleAnoFilter" class="form-select" onchange="location.href='@Url.Action("Index")?controleAnoId=' + this.value">
+                        <option value="">Todos os anos</option>
+                        @foreach (var controle in ViewBag.ControleAnos)
+                        {
+                            @if (isSelected == controle.Id.ToString())
+                            {
+                                <option value="@controle.Id" selected>@controle.Nome (@controle.Ano)</option>
+                            }
+                            else
+                            {
+                                <option value="@controle.Id">@controle.Nome (@controle.Ano)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col">
+                            <h5>Total de Categorias</h5>
+                            <h2>@Model.Count()</h2>
+                        </div>
+                        <div class="col">
+                            <h5>Total de Subcategorias</h5>
+                            <h2>@Model.SelectMany(c => c.Subcategorias).Count()</h2>
+                        </div>
+                        <div class="col">
+                            <h5>Média por Categoria</h5>
+                            <h2>@(Model.Any() ? Math.Round((double)Model.SelectMany(c => c.Subcategorias).Count() / Model.Count(), 1) : 0)</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-tags text-info" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="text-muted">Nenhuma categoria cadastrada</h3>
+            <p class="text-muted">Crie suas primeiras categorias para organizar receitas e despesas</p>
+            @if (ViewBag.ControleAnoId.HasValue)
+            {
+                <a asp-action="Create" asp-route-controleAnoId="@ViewBag.ControleAnoId" class="btn btn-lg btn-info">
+                    <i class="fas fa-plus"></i> Criar Categoria
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var categoria in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header d-flex justify-content-between align-items-center" 
+                             style="background-color: @(categoria.Cor ?? "#17a2b8"); color: white;">
+                            <h5 class="mb-0">@categoria.Nome</h5>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Edit" asp-route-id="@categoria.Id" class="btn btn-sm btn-light">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@categoria.Id" class="btn btn-sm btn-light">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">Cor:</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded" style="width: 20px; height: 20px; background-color: @(categoria.Cor ?? "#17a2b8");"></div>
+                                    <code>@(categoria.Cor ?? "#17a2b8")</code>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">Subcategorias (@categoria.Subcategorias.Count):</small>
+                                @if (categoria.Subcategorias.Any())
+                                {
+                                    <div class="mt-2">
+                                        @foreach (var subcategoria in categoria.Subcategorias.Take(3))
+                                        {
+                                            <span class="badge bg-secondary me-1">@subcategoria.Nome</span>
+                                        }
+                                        @if (categoria.Subcategorias.Count > 3)
+                                        {
+                                            <span class="badge bg-light text-dark">+@(categoria.Subcategorias.Count - 3)</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted mb-0">Nenhuma subcategoria</p>
+                                }
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a asp-action="CreateSubcategoria" asp-route-categoriaId="@categoria.Id" 
+                                   class="btn btn-sm btn-outline-primary flex-fill">
+                                    <i class="fas fa-plus"></i> Add Subcategoria
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@categoria.Id" 
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-cog"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> @categoria.ControleAno?.Nome
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

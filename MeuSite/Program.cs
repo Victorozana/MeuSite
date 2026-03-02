@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MeuSite.Data;
+using MeuSite.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,10 @@ builder.Services.AddControllersWithViews();
 // Configurar Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Registrar serviços
+builder.Services.AddScoped<CalculoService>();
+builder.Services.AddScoped<RelatorioService>();
 
 var app = builder.Build();
 

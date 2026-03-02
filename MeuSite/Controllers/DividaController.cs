@@ -61,9 +61,9 @@ namespace MeuSite.Controllers
 
         private async Task CriarParcelas(Divida divida)
         {
-            decimal valorParcela = divida.ValorTotal / divida.Parcelas;
+            decimal valorParcela = divida.ValorTotal / divida.NumeroParcelas;
             
-            for (int i = 1; i <= divida.Parcelas; i++)
+            for (int i = 1; i <= divida.NumeroParcelas; i++)
             {
                 var parcela = new ParcelaDivida
                 {

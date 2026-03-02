@@ -14,7 +14,7 @@ namespace MeuSite.Models.Entities
         public decimal ValorTotal { get; set; }
         
         [Required]
-        public int Parcelas { get; set; }
+        public int NumeroParcelas { get; set; }
         
         [Required]
         public DateTime DataPrimeiroVencimento { get; set; }

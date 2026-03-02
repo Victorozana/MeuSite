@@ -1,0 +1,179 @@
+@model MeuSite.Models.Entities.Divida
+@{
+    ViewData["Title"] = "Nova Dívida";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-warning">@ViewData["Title"]</h1>
+            <p class="lead">Adicione uma nova dívida parcelada ao seu controle financeiro</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Informações da Dívida</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Descricao" class="form-label fw-bold">Descrição</label>
+                                    <input asp-for="Descricao" class="form-control form-control-lg" 
+                                           placeholder="Ex: Financiamento do carro, Empréstimo pessoal, etc." />
+                                    <span asp-validation-for="Descricao" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ValorTotal" class="form-label fw-bold">Valor Total (R$)</label>
+                                    <input asp-for="ValorTotal" class="form-control form-control-lg money-input" 
+                                           type="text" placeholder="0,00" />
+                                    <span asp-validation-for="ValorTotal" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="NumeroParcelas" class="form-label fw-bold">Número de Parcelas</label>
+                                    <input asp-for="NumeroParcelas" class="form-control form-control-lg" 
+                                           type="number" min="1" max="360" value="12" />
+                                    <span asp-validation-for="NumeroParcelas" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="DataPrimeiroVencimento" class="form-label fw-bold">Primeiro Vencimento</label>
+                                    <input asp-for="DataPrimeiroVencimento" class="form-control form-control-lg" type="date" />
+                                    <span asp-validation-for="DataPrimeiroVencimento" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ControleAnoId" class="form-label fw-bold">Controle Anual</label>
+                                    <select asp-for="ControleAnoId" class="form-select form-select-lg" asp-items="ViewBag.ControleAnos">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                    <span asp-validation-for="ControleAnoId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="CategoriaId" class="form-label fw-bold">Categoria</label>
+                                    <select asp-for="CategoriaId" class="form-select form-select-lg" asp-items="ViewBag.Categorias">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                    <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-bold">Valor da Parcela (calculado)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" id="valorParcela" class="form-control form-control-lg" readonly 
+                                               placeholder="0,00" />
+                                    </div>
+                                    <small class="text-muted">Valor total ÷ número de parcelas</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Atenção:</strong> As parcelas serão criadas automaticamente com base nas informações acima.
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg flex-fill">
+                                <i class="fas fa-save"></i> Criar Dívida e Parcelas
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Dicas Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            <strong>Descrição:</strong> Use nomes claros como "Financiamento Carro 2024"
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            <strong>Parcelas:</strong> Informe o número total de parcelas
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            <strong>Vencimento:</strong> Data da primeira parcela
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            <strong>Auto:</strong> Parcelas são criadas mensalmente
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mt-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Simulação</h5>
+                </div>
+                <div class="card-body">
+                    <div id="simulacao">
+                        <p class="text-muted">Preencha os campos para ver a simulação</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            function calcularParcela() {
+                var valorTotal = parseFloat($('#ValorTotal').val().replace(',', '.')) || 0;
+                var parcelas = parseInt($('#NumeroParcelas').val()) || 1;
+                var valorParcela = valorTotal / parcelas;
+                
+                $('#valorParcela').val(valorParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                
+                // Atualizar simulação
+                if (valorTotal > 0 && parcelas > 0) {
+                    var dataVenc = new Date($('#DataPrimeiroVencimento').val());
+                    var simulacaoHtml = '<h6>Resumo da Dívida:</h6>';
+                    simulacaoHtml += '<ul class="list-unstyled">';
+                    simulacaoHtml += '<li><strong>Valor Total:</strong> R$ ' + valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + '</li>';
+                    simulacaoHtml += '<li><strong>Parcelas:</strong> ' + parcelas + 'x de R$ ' + valorParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + '</li>';
+                    simulacaoHtml += '<li><strong>Último Vencimento:</strong> ' + new Date(dataVenc.setMonth(dataVenc.getMonth() + parcelas - 1)).toLocaleDateString('pt-BR') + '</li>';
+                    simulacaoHtml += '</ul>';
+                    $('#simulacao').html(simulacaoHtml);
+                }
+            }
+            
+            $('#ValorTotal, #NumeroParcelas').on('input', calcularParcela);
+            $('#DataPrimeiroVencimento').on('change', calcularParcela);
+        });
+    </script>
+}

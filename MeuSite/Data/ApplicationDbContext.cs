@@ -77,10 +77,11 @@ namespace MeuSite.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Descricao).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.ValorTotal).HasPrecision(18, 2);
-                entity.Property(e => e.Parcelas).IsRequired();
+                entity.Property(e => e.NumeroParcelas).IsRequired();
                 entity.Property(e => e.DataPrimeiroVencimento).IsRequired();
                 entity.HasOne(e => e.ControleAno).WithMany(c => c.Dividas).HasForeignKey(e => e.ControleAnoId);
                 entity.HasOne(e => e.Categoria).WithMany().HasForeignKey(e => e.CategoriaId);
+                entity.Ignore(e => e.Parcelas); // Ignorar a propriedade que conflita com o nome da coleção
             });
 
             // Configuração de ParcelaDivida

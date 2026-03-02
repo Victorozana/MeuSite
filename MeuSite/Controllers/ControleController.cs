@@ -1,16 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using MeuSite.Data;
 using Microsoft.EntityFrameworkCore;
+using MeuSite.Services;
+using MeuSite.Models.Entities;
 
 namespace MeuSite.Controllers
 {
     public class ControleController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly CalculoService _calculoService;
 
-        public ControleController(ApplicationDbContext context)
+        public ControleController(ApplicationDbContext context, CalculoService calculoService)
         {
             _context = context;
+            _calculoService = calculoService;
         }
 
         public async Task<IActionResult> Index()
@@ -23,6 +27,28 @@ namespace MeuSite.Controllers
                 .ToListAsync();
 
             return View(controles);
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var controle = await _context.ControleAnos
+                .Include(c => c.Categorias)
+                .Include(c => c.Receitas)
+                .Include(c => c.Despesas)
+                .Include(c => c.Dividas)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (controle == null)
+            {
+                return NotFound();
+            }
+
+            return View(controle);
         }
 
         public IActionResult Create()

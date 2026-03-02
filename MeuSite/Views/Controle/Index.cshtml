@@ -64,6 +64,10 @@
                         </div>
                         <div class="card-footer bg-transparent">
                             <div class="btn-group w-100" role="group">
+                                <a asp-action="Details" asp-route-id="@controle.Id" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-chart-line"></i> Resumo
+                                </a>
                                 <a asp-controller="Receita" asp-action="Index" asp-route-controleAnoId="@controle.Id" 
                                    class="btn btn-outline-success btn-sm">
                                     <i class="fas fa-plus"></i> Receitas
