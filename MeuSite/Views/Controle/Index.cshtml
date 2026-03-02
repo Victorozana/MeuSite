@@ -1,0 +1,86 @@
+@model IEnumerable<MeuSite.Models.Entities.ControleAno>
+@{
+    ViewData["Title"] = "Controle Financeiro";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 text-primary">Controle Financeiro</h1>
+            <p class="lead">Gerencie suas finanças por ano</p>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Novo Controle Anual
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <h3 class="text-muted">Nenhum controle financeiro cadastrado</h3>
+            <p class="text-muted">Crie seu primeiro controle anual para começar</p>
+            <a asp-action="Create" class="btn btn-lg btn-primary">
+                <i class="fas fa-plus-circle"></i> Criar Controle
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var controle in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">@controle.Nome</h5>
+                            <small class="opacity-75">Ano @controle.Ano</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="text-success">
+                                        <i class="fas fa-arrow-up fa-2x"></i>
+                                        <h6 class="mt-2">Receitas</h6>
+                                        <strong>@controle.Receitas.Sum(r => r.Valor):C</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-danger">
+                                        <i class="fas fa-arrow-down fa-2x"></i>
+                                        <h6 class="mt-2">Despesas</h6>
+                                        <strong>@controle.Despesas.Sum(d => d.Valor):C</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-warning">
+                                        <i class="fas fa-credit-card fa-2x"></i>
+                                        <h6 class="mt-2">Dívidas</h6>
+                                        <strong>@controle.Dividas.Sum(d => d.ValorTotal):C</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="btn-group w-100" role="group">
+                                <a asp-controller="Receita" asp-action="Index" asp-route-controleAnoId="@controle.Id" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-plus"></i> Receitas
+                                </a>
+                                <a asp-controller="Despesa" asp-action="Index" asp-route-controleAnoId="@controle.Id" 
+                                   class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-minus"></i> Despesas
+                                </a>
+                                <a asp-controller="Divida" asp-action="Index" asp-route-controleAnoId="@controle.Id" 
+                                   class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-credit-card"></i> Dívidas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
