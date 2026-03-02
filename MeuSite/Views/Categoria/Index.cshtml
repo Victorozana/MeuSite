@@ -11,7 +11,7 @@
         </div>
         <div class="col-auto">
             <div class="btn-group" role="group">
-                @if (ViewBag.ControleAnoId.HasValue)
+                @if (ViewBag.ControleAnoId != null)
                 {
                     <a asp-action="Create" asp-route-controleAnoId="@ViewBag.ControleAnoId" class="btn btn-info">
                         <i class="fas fa-plus"></i> Nova Categoria
@@ -31,7 +31,7 @@
                 <div class="card-body">
                     <label class="form-label fw-bold">Filtrar por Ano:</label>
                     @{
-                        var controleAnoId = ViewBag.ControleAnoId;
+                        var controleAnoId = ViewBag.ControleAnoId as int?;
                         var isSelected = controleAnoId?.ToString();
                     }
                     <select id="controleAnoFilter" class="form-select" onchange="location.href='@Url.Action("Index")?controleAnoId=' + this.value">
@@ -81,7 +81,7 @@
             </div>
             <h3 class="text-muted">Nenhuma categoria cadastrada</h3>
             <p class="text-muted">Crie suas primeiras categorias para organizar receitas e despesas</p>
-            @if (ViewBag.ControleAnoId.HasValue)
+            @if (ViewBag.ControleAnoId != null)
             {
                 <a asp-action="Create" asp-route-controleAnoId="@ViewBag.ControleAnoId" class="btn btn-lg btn-info">
                     <i class="fas fa-plus"></i> Criar Categoria
